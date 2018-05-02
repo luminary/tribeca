@@ -96,26 +96,26 @@ var OrderListController = ($scope: OrderListScope,
         rowHeight: 20,
         headerRowHeight: 20,
         columnDefs: [
-            { width: 120, field: 'time', displayName: 'time', cellFilter: "momentFullDate", 
+            { width: 140, field: 'time', displayName: 'Time', cellFilter: "momentFullDate",
                 sortingAlgorithm: Shared.fastDiff,
                 sort: { direction: uiGridConstants.DESC, priority: 1} },
-            { width: 90, field: 'orderId', displayName: 'id' },
-            { width: 35, field: 'version', displayName: 'v' },
-            { width: 120, field: 'orderStatus', displayName: 'status' },
-            { width: 65, field: 'price', displayName: 'px' },
-            { width: 60, field: 'quantity', displayName: 'qty' },
-            { width: 50, field: 'side', displayName: 'side' },
-            { width: 50, field: 'orderType', displayName: 'type' },
-            { width: 50, field: 'tif', displayName: 'tif' },
-            { width: 35, field: 'computationalLatency', displayName: 'lat' },
-            { width: 60, field: 'lastQuantity', displayName: 'lQty' },
-            { width: 65, field: 'lastPrice', displayName: 'lPx' },
-            { width: 60, field: 'leavesQuantity', displayName: 'lvQty' },
-            { width: 60, field: 'cumQuantity', displayName: 'cum' },
-            { width: 65, field: 'averagePrice', displayName: 'avg' },
-            { width: 40, field: 'liquidity', displayName: 'liq' },
-            { width: "*", field: 'rejectMessage', displayName: 'msg' },
-            { width: 40, name: "cancel", displayName: 'cxl', cellTemplate: '<button type="button" class="btn btn-danger btn-xs" ng-click="row.entity.cancel()"><span class="glyphicon glyphicon-remove"></span></button>' },
+            { width: 90, field: 'orderId', displayName: 'OrderId' },
+            { width: 50, field: 'version', displayName: 'Ver' },
+            { width: 120, field: 'orderStatus', displayName: 'Status' },
+            { width: 80, field: 'price', displayName: 'Price' },
+            { width: 60, field: 'quantity', displayName: 'Qty' },
+            { width: 40, field: 'side', displayName: 'Side' },
+            { width: 90, field: 'orderType', displayName: 'OrderType' },
+            { width: 60, field: 'tif', displayName: 'TIF' },
+            { width: 90, field: 'computationalLatency', displayName: 'Latency' },
+            { width: 90, field: 'lastQuantity', displayName: 'LastQty' },
+            { width: 90, field: 'lastPrice', displayName: 'LastPrice' },
+            { width: 90, field: 'leavesQuantity', displayName: 'LeavesQty' },
+            { width: 90, field: 'cumQuantity', displayName: 'CumQty' },
+            { width: 90, field: 'averagePrice', displayName: 'AvgPrice' },
+            { width: 80, field: 'liquidity', displayName: 'Liquidity' },
+            { width: "*", field: 'rejectMessage', displayName: 'RejectMessage' },
+            { width: 80, name: "cancel", displayName: 'Cancel', cellTemplate: '<button type="button" class="btn btn-danger btn-xs" ng-click="row.entity.cancel()"><span class="glyphicon glyphicon-remove"></span></button>' },
         ]
     };
 
@@ -152,7 +152,7 @@ var OrderListController = ($scope: OrderListScope,
 };
 
 var orderList = (): ng.IDirective => {
-    var template = '<div><div ui-grid="gridOptions" ui-grid-grouping class="table table-striped table-hover table-condensed" style="height: 150px"></div></div>';
+    var template = '<div><div ui-grid="gridOptions" ui-grid-grouping class="table table-striped table-hover table-condensed" style="height: 300px"></div></div>';
 
     return {
         template: template,

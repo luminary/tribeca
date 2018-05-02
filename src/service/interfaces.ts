@@ -13,6 +13,7 @@ export interface IExchangeDetailsGateway {
     takeFee(): number;
     exchange(): Models.Exchange;
     minTickIncrement: number;
+    minLotIncrement?: number;
     hasSelfTradePrevention: boolean;
 }
 
@@ -34,12 +35,12 @@ export interface IOrderEntryGateway extends IGateway {
     sendOrder(order: Models.OrderStatusReport): void;
     cancelOrder(cancel: Models.OrderStatusReport): void;
     replaceOrder(replace: Models.OrderStatusReport): void;
-    
+
     OrderUpdate: Utils.Evt<Models.OrderStatusUpdate>;
-    
+
     cancelsByClientOrderId: boolean;
     generateClientOrderId(): string;
-    
+
     supportsCancelAllOpenOrders() : boolean;
     cancelAllOpenOrders() : q.Promise<number>;
 }
@@ -53,7 +54,9 @@ export class CombinedGateway {
         public md: IMarketDataGateway,
         public oe: IOrderEntryGateway,
         public pg: IPositionGateway,
-        public base: IExchangeDetailsGateway) { }
+        public base: IExchangeDetailsGateway,
+        public fvmd?: IMarketDataGateway
+    ) { }
 }
 
 export interface IMarketTradeBroker {
@@ -95,6 +98,7 @@ export interface IBroker extends IBrokerConnectivity {
     exchange(): Models.Exchange;
 
     minTickIncrement: number;
+    minLotIncrement: number;
     pair: Models.CurrencyPair;
 
     hasSelfTradePrevention: boolean;

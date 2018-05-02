@@ -13,6 +13,10 @@ class QuoteOrder {
     constructor(public quote: Models.Quote, public orderId: string) { }
 }
 
+class QuotePlacement {
+    constructor(public quote: Models.Quote, public orderIds: Set<string>) { }
+}
+
 // aggregator for quoting
 export class Quoter {
     private _bidQuoter: ExchangeQuoter;
@@ -54,10 +58,10 @@ export class Quoter {
 
 // wraps a single broker to make orders behave like quotes
 export class ExchangeQuoter {
-    private _activeQuote: QuoteOrder = null;
+    private _activeQuote: QuotePlacement = null;
     private _exchange: Models.Exchange;
 
-    public quotesSent: QuoteOrder[] = [];
+    public quotesSent: QuotePlacement[] = [];
 
     constructor(private _broker: Interfaces.IOrderBroker,
         private _exchBroker: Interfaces.IBroker,
@@ -72,11 +76,13 @@ export class ExchangeQuoter {
             case Models.OrderStatus.Complete:
             case Models.OrderStatus.Rejected:
                 const bySide = this._activeQuote;
-                if (bySide !== null && bySide.orderId === o.orderId) {
-                    this._activeQuote = null;
+                if (bySide !== null && bySide.orderIds.has(o.orderId)) {
+                    this._activeQuote.orderIds.delete(o.orderId);
+                    if (this._activeQuote.orderIds.size == 0)
+                        this._activeQuote = null;
                 }
 
-                this.quotesSent = this.quotesSent.filter(q => q.orderId !== o.orderId);
+                this.quotesSent = this.quotesSent.filter(q => !q.orderIds.has(o.orderId));  // TODO revist this for limit calc logic
         }
     };
 
@@ -106,11 +112,27 @@ export class ExchangeQuoter {
     private start = (q: Models.Timestamped<Models.Quote>): Models.QuoteSent => {
         const existing = this._activeQuote;
 
-        const newOrder = new Models.SubmitNewOrder(this._side, q.data.size, Models.OrderType.Limit,
-            q.data.price, Models.TimeInForce.GTC, this._exchange, q.time, true, Models.OrderSource.Quote);
-        const sent = this._broker.sendOrder(newOrder);
+        var quoteOrderIds = new Set<string>();
 
-        const quoteOrder = new QuoteOrder(q.data, sent.sentOrderClientId);
+        const tickSize = this._exchBroker.minTickIncrement;
+        //TODO this should be per symbol
+        const lotSize = this._exchBroker.minLotIncrement ? this._exchBroker.minLotIncrement : 0.01;
+
+        // TODO make this random and configurable
+        var maxDepth = 5;
+        while (maxDepth) {
+            const qty = q.data.size * 0.2;
+            const price = q.data.price + tickSize * maxDepth * (this._side == Models.Side.Ask ? 1 : -1);
+
+            const newOrder = new Models.SubmitNewOrder(this._side, qty, Models.OrderType.Limit,
+                price, Models.TimeInForce.GTC, this._exchange, q.time, true, Models.OrderSource.Quote);
+            const sent = this._broker.sendOrder(newOrder);
+            quoteOrderIds.add(sent.sentOrderClientId);
+
+            maxDepth--;
+        }
+
+        const quoteOrder = new QuotePlacement(q.data, quoteOrderIds);
         this.quotesSent.push(quoteOrder);
         this._activeQuote = quoteOrder;
 
@@ -122,8 +144,11 @@ export class ExchangeQuoter {
             return Models.QuoteSent.UnsentDelete;
         }
 
-        const cxl = new Models.OrderCancel(this._activeQuote.orderId, this._exchange, t);
-        this._broker.cancelOrder(cxl);
+        for (let oid of this._activeQuote.orderIds) {
+            const cxl = new Models.OrderCancel(oid, this._exchange, t);
+            this._broker.cancelOrder(cxl);
+        }
+
         this._activeQuote = null;
         return Models.QuoteSent.Delete;
     };

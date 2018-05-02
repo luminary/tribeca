@@ -1,7 +1,8 @@
 # General config properties. Properties with `NULL` should be replaced with your own exchange account information.
 TRIBECA_MODE=dev
-EXCHANGE=null
-TradedPair=BTC/USD
+EXCHANGE=CoinRoom
+FAIRVALUEEXCHANGE=CyptoWatch
+TradedPair=ETH/BTC
 WebClientUsername=NULL
 WebClientPassword=NULL
 WebClientListenPort=3000
@@ -11,6 +12,15 @@ ShowAllOrders=true
 NullGatewayTick=100
 
 # DEV
+## CoinRoom
+CoinRoomHttpUrl=http://116.62.146.243:4200
+CoinRoomApiKey=NULL
+CoinRoomSecret=NULL
+CoinRoomOrderDestination=CoinRoom
+
+CryptoWatchHttpUrl=https://api.cryptowat.ch
+CryptoWatchMarkets=binance
+
 ## HitBtc
 HitBtcPullUrl=http://demo-api.hitbtc.com
 HitBtcOrderEntryUrl=wss://demo-api.hitbtc.com:8080

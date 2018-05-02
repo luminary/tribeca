@@ -23,7 +23,7 @@ interface MarketQuotingScope extends ng.IScope {
     levels: Level[];
     qBidSz: number;
     qBidPx: string;
-    fairValue: string;
+//    fairValue: string;
     spreadValue: string;
     qAskPx: string;
     qAskSz: number;
@@ -121,7 +121,7 @@ var MarketQuotingController = ($scope: MarketQuotingScope,
             }
 
             if (quote.ask !== null && quote.bid !== null) {
-                const spreadAbsolutePrice = (quote.ask.price - quote.bid.price).toFixed(2);
+                const spreadAbsolutePrice = (quote.ask.price - quote.bid.price).toFixed(6);
                 const spreadPercent = toPercent(quote.ask.price, quote.bid.price);
                 $scope.spreadValue = `${spreadAbsolutePrice} / ${spreadPercent}%`;
             }
@@ -190,7 +190,9 @@ var MarketQuotingController = ($scope: MarketQuotingScope,
     makeSubscriber<Models.Market>(Messaging.Topics.MarketData, updateMarket, clearMarket);
     makeSubscriber<Models.TwoSidedQuote>(Messaging.Topics.Quote, updateQuote, clearQuote);
     makeSubscriber<Models.TwoSidedQuoteStatus>(Messaging.Topics.QuoteStatus, updateQuoteStatus, clearQuoteStatus);
-    makeSubscriber<Models.FairValue>(Messaging.Topics.FairValue, updateFairValue, clearFairValue);
+
+// this value is moved to fv market widget
+//    makeSubscriber<Models.FairValue>(Messaging.Topics.FairValue, updateFairValue, clearFairValue);
 
     $scope.$on('$destroy', () => {
         subscribers.forEach(d => d.disconnect());

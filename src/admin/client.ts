@@ -25,6 +25,7 @@ import Messaging = require("../common/messaging");
 import Shared = require("./shared_directives");
 import Pair = require("./pair");
 import MarketQuoting = require("./market-quoting");
+import MarketFvReference = require("./market-fv-reference");
 import MarketTrades = require("./market-trades");
 import Messages = require("./messages");
 import Position = require("./position");
@@ -85,10 +86,10 @@ var uiCtrl = ($scope : MainWindowScope,
               subscriberFactory : Shared.SubscriberFactory,
               fireFactory : Shared.FireFactory,
               product: Shared.ProductState) => {
-    
+
     var cancelAllFirer = fireFactory.getFire(Messaging.Topics.CancelAllOrders);
     $scope.cancelAllOrders = () => cancelAllFirer.fire(new Models.CancelAllOrdersRequest());
-                  
+
     $scope.order = new DisplayOrder(fireFactory, $log);
     $scope.pair = null;
 
@@ -100,7 +101,7 @@ var uiCtrl = ($scope : MainWindowScope,
         $scope.exch_name = Models.Exchange[pa.exchange];
         $scope.pair = new Pair.DisplayPair($scope, subscriberFactory, fireFactory);
         product.advert = pa;
-        product.fixed = -1*Math.floor(Math.log10(pa.minTick)); 
+        product.fixed = -1*Math.floor(Math.log10(pa.minTick));
     };
 
     var reset = (reason : string, connected: boolean) => {
@@ -136,8 +137,9 @@ var requires = ['ui.bootstrap',
                 OrderList.orderListDirective,
                 Trades.tradeListDirective,
                 MarketQuoting.marketQuotingDirective,
+                MarketFvReference.marketFvReferenceDirective,
                 MarketTrades.marketTradeDirective,
-                Messages.messagesDirective, 
+                Messages.messagesDirective,
                 Position.positionDirective,
                 Tbp.targetBasePositionDirective,
                 TradeSafety.tradeSafetyDirective,

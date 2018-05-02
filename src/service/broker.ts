@@ -39,8 +39,8 @@ export class MarketDataBroker implements Interfaces.IMarketDataBroker {
             if (!this.currentBook) return;
             rawMarketPublisher.publish(this._currentBook);
             persister.persist(new Models.Market(
-                _.take(this.currentBook.bids, 3), 
-                _.take(this.currentBook.asks, 3), 
+                _.take(this.currentBook.bids, 3),
+                _.take(this.currentBook.asks, 3),
                 new Date()));
         }, moment.duration(1, "second"));
 
@@ -66,7 +66,7 @@ export class OrderBroker implements Interfaces.IOrderBroker {
         if (this._oeGateway.supportsCancelAllOpenOrders()) {
             return this._oeGateway.cancelAllOpenOrders();
         }
-        
+
         const promiseMap = new Map<string, Q.Deferred<void>>();
 
         const orderUpdate = (o : Models.OrderStatusReport) => {
@@ -78,7 +78,7 @@ export class OrderBroker implements Interfaces.IOrderBroker {
         this.OrderUpdate.on(orderUpdate);
 
         for (let e of this._orderCache.allOrders.values()) {
-            if (e.pendingCancel || Models.orderIsDone(e.orderStatus)) 
+            if (e.pendingCancel || Models.orderIsDone(e.orderStatus))
                 continue;
 
             this.cancelOrder(new Models.OrderCancel(e.orderId, e.exchange, this._timeProvider.utcNow()));
@@ -141,7 +141,7 @@ export class OrderBroker implements Interfaces.IOrderBroker {
             quantity: replace.quantity
         };
 
-        this._oeGateway.replaceOrder(this.updateOrderState(rpt));        
+        this._oeGateway.replaceOrder(this.updateOrderState(rpt));
 
         return new Models.SentOrder(report.orderId);
     };
@@ -169,6 +169,13 @@ export class OrderBroker implements Interfaces.IOrderBroker {
         };
 
         this._oeGateway.cancelOrder(this.updateOrderState(report));
+    };
+
+    public getOrderStatus = (orderId: string) => {
+        if (this._orderCache.allOrders.has(orderId))
+            return this._orderCache.allOrders.get(orderId);
+        else
+            return null;
     };
 
     public updateOrderState = (osr : Models.OrderStatusUpdate) : Models.OrderStatusReport => {
@@ -274,7 +281,7 @@ export class OrderBroker implements Interfaces.IOrderBroker {
                 value = value * (1 + sign * feeCharged);
             }
 
-            const trade = new Models.Trade(o.orderId+"."+o.version, o.time, o.exchange, o.pair, 
+            const trade = new Models.Trade(o.orderId+"."+o.version, o.time, o.exchange, o.pair,
                 o.lastPrice, o.lastQuantity, o.side, value, o.liquidity, feeCharged);
             this.Trade.trigger(trade);
             this._tradePublisher.publish(trade);
@@ -351,7 +358,7 @@ export class OrderBroker implements Interfaces.IOrderBroker {
                 private readonly _publishAllOrders: boolean) {
         _.each(initOrders, this.addOrderStatusInMemory);
         _.each(initTrades, t => this._trades.push(t));
-                
+
         _orderStatusPublisher.registerSnapshot(() => this.orderStatusSnapshot());
         _tradePublisher.registerSnapshot(() => _.takeRight(this._trades, 100));
 
@@ -359,7 +366,7 @@ export class OrderBroker implements Interfaces.IOrderBroker {
             this._log.info("got new order req", o);
             try {
                 const order = new Models.SubmitNewOrder(Models.Side[o.side], o.quantity, Models.OrderType[o.orderType],
-                    o.price, Models.TimeInForce[o.timeInForce], this._baseBroker.exchange(), _timeProvider.utcNow(), 
+                    o.price, Models.TimeInForce[o.timeInForce], this._baseBroker.exchange(), _timeProvider.utcNow(),
                     false, Models.OrderSource.OrderTicket);
                 this.sendOrder(order);
             }
@@ -367,20 +374,20 @@ export class OrderBroker implements Interfaces.IOrderBroker {
                 this._log.error(e, "unhandled exception while submitting order", o);
             }
         });
-        
+
         _cancelOrderReciever.registerReceiver(o => {
             this._log.info("got new cancel req", o);
             try {
-                this.cancelOrder(new Models.OrderCancel(o.orderId, o.exchange, _timeProvider.utcNow()));    
+                this.cancelOrder(new Models.OrderCancel(o.orderId, o.exchange, _timeProvider.utcNow()));
             } catch (e) {
                 this._log.error(e, "unhandled exception while submitting order", o);
             }
         });
-        
+
         _cancelAllOrdersReciever.registerReceiver(o => {
             this._log.info("handling cancel all orders request");
             this.cancelOpenOrders()
-                .then(x => this._log.info("cancelled all ", x, " open orders"), 
+                .then(x => this._log.info("cancelled all ", x, " open orders"),
                       e => this._log.error(e, "error when cancelling all orders!"));
         });
 
@@ -429,8 +436,8 @@ export class PositionBroker implements Interfaces.IPositionBroker {
         const positionReport = new Models.PositionReport(baseAmount, quoteAmount, basePosition.heldAmount,
             quotePosition.heldAmount, baseValue, quoteValue, this._base.pair, this._base.exchange(), this._timeProvider.utcNow());
 
-        if (this._report !== null && 
-                Math.abs(positionReport.value - this._report.value) < 2e-2 && 
+        if (this._report !== null &&
+                Math.abs(positionReport.value - this._report.value) < 2e-2 &&
                 Math.abs(baseAmount - this._report.baseAmount) < 2e-2 &&
                 Math.abs(positionReport.baseHeldAmount - this._report.baseHeldAmount) < 2e-2 &&
                 Math.abs(positionReport.quoteHeldAmount - this._report.quoteHeldAmount) < 2e-2)
@@ -480,7 +487,11 @@ export class ExchangeBroker implements Interfaces.IBroker {
     public get minTickIncrement() {
         return this._baseGateway.minTickIncrement;
     }
-    
+
+    public get minLotIncrement() {
+        return this._baseGateway.minLotIncrement;
+    }
+
     ConnectChanged = new Utils.Evt<Models.ConnectivityStatus>();
     private mdConnected = Models.ConnectivityStatus.Disconnected;
     private oeConnected = Models.ConnectivityStatus.Disconnected;

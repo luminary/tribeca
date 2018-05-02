@@ -13,7 +13,7 @@ var uuid = require('node-uuid');
 export class NullOrderGateway implements Interfaces.IOrderEntryGateway {
     OrderUpdate = new Utils.Evt<Models.OrderStatusUpdate>();
     ConnectChanged = new Utils.Evt<Models.ConnectivityStatus>();
-    
+
     supportsCancelAllOpenOrders = () : boolean => { return false; };
     cancelAllOpenOrders = () : Q.Promise<number> => { return Q(0); };
 
@@ -101,10 +101,10 @@ export class NullMarketDataGateway implements Interfaces.IMarketDataGateway {
         return new Models.GatewayMarketTrade(this.getPrice(sign), Math.random(), Utils.date(), false, side);
     }
 
-    private genSingleLevel = (sign: number) => 
+    private genSingleLevel = (sign: number) =>
         new Models.MarketSide(this.getPrice(sign), Math.random());
 
-    private readonly Depth: number = 25;
+    private readonly Depth: number = 10;
     private generateMarketData = () => {
         const genSide = (sign: number) => {
             const s = _.times(this.Depth, _ => this.genSingleLevel(sign));
@@ -142,10 +142,11 @@ class NullGateway extends Interfaces.CombinedGateway {
     constructor(config: Config.IConfigProvider, pair: Models.CurrencyPair) {
         const minTick = config.GetNumber("NullGatewayTick");
         super(
-            new NullMarketDataGateway(minTick), 
-            new NullOrderGateway(), 
-            new NullPositionGateway(pair), 
-            new NullGatewayDetails(minTick));
+            new NullMarketDataGateway(minTick),
+            new NullOrderGateway(),
+            new NullPositionGateway(pair),
+            new NullGatewayDetails(minTick)
+        );
     }
 }
 

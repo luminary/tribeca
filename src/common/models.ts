@@ -15,10 +15,11 @@ export class Timestamped<T> implements ITimestamped {
 
 export class MarketSide {
     constructor(public price: number,
-                public size: number) { }
+                public size: number,
+                public exchange?: string) { }
 
     public toString() {
-        return "px=" + this.price + ";size=" + this.size;
+        return "px=" + this.price + ";size=" + this.size + ";exchange=" + this.exchange;
     }
 }
 
@@ -58,37 +59,42 @@ export class MarketTrade implements ITimestamped {
                 public make_side: Side) {}
 }
 
-export enum Currency { 
-    USD, 
-    BTC, 
-    LTC, 
-    EUR, 
-    GBP, 
-    CNY, 
-    ETH, 
-    BFX, 
-    RRT, 
-    ZEC, 
-    BCN, 
-    DASH, 
-    DOGE, 
-    DSH, 
-    EMC, 
-    FCN, 
-    LSK, 
-    NXT, 
-    QCN, 
-    SDB, 
-    SCB, 
-    STEEM, 
-    XDN, 
-    XEM, 
-    XMR, 
-    ARDR, 
-    WAVES, 
-    BTU, 
-    MAID, 
-    AMP 
+export enum Currency {
+    USD,
+    BTC,
+    LTC,
+    EUR,
+    GBP,
+    CNY,
+    ETH,
+    BFX,
+    RRT,
+    ZEC,
+    BCN,
+    DASH,
+    DOGE,
+    DSH,
+    EMC,
+    FCN,
+    LSK,
+    NXT,
+    QCN,
+    SDB,
+    SCB,
+    STEEM,
+    XDN,
+    XEM,
+    XMR,
+    ARDR,
+    WAVES,
+    BTU,
+    MAID,
+    AMP,
+    AUD,
+    BCH,
+    HSR,
+    ETC,
+    EOS,
 }
 
 export function toCurrency(c: string) : Currency|undefined {
@@ -103,11 +109,11 @@ export function fromCurrency(c: Currency) : string|undefined {
 
 export enum GatewayType { MarketData, OrderEntry, Position }
 export enum ConnectivityStatus { Connected, Disconnected }
-export enum Exchange { Null, HitBtc, OkCoin, AtlasAts, BtcChina, Coinbase, Bitfinex }
+export enum Exchange { Null, HitBtc, OkCoin, AtlasAts, BtcChina, Coinbase, Bitfinex, CoinRoom, CryptoWatch }
 export enum Side { Bid, Ask, Unknown }
 export enum OrderType { Limit, Market }
 export enum TimeInForce { IOC, FOK, GTC }
-export enum OrderStatus { New, Working, Complete, Cancelled, Rejected, Other }
+export enum OrderStatus { New, Working, Complete, PendingCancel, Cancelled, Rejected, Other }
 export enum Liquidity { Make, Take }
 
 export const orderIsDone = (status: OrderStatus) => {

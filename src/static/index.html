@@ -36,33 +36,91 @@
 
 <script type="text/ng-template" id="market_display.html">
     <table class="table table-hover table-bordered table-condensed table-responsive">
-        <tr class="active">
-            <th></th>
-            <th>bidSz</th>
-            <th>bidPx</th>
-            <th>FV</th>
-            <th>Spread</th>
-            <th>askPx</th>
-            <th>askSz</th>
-        </tr>
-        <tr class="info">
-            <td>q</td>
-            <td ng-class="bidIsLive ? 'text-danger' : 'text-muted'">{{ qBidSz|number:2 }}</td>
-            <td ng-class="bidIsLive ? 'text-danger' : 'text-muted'">{{ qBidPx }}</td>
-            <td>{{ fairValue }}</td>
-            <td>{{ spreadValue }}</td>
-            <td ng-class="askIsLive ? 'text-danger' : 'text-muted'">{{ qAskPx }}</td>
-            <td ng-class="askIsLive ? 'text-danger' : 'text-muted'">{{ qAskSz|number:2 }}</td>
-        </tr>
-        <tr class="active" ng-repeat="level in levels">
-            <td>mkt{{ $index }}</td>
-            <td>{{ level.bidSize|number:2 }}</td>
-            <td ng-class="level.bidClass">{{ level.bidPrice }}</td>
-            <td></td>
-            <td></td>
-            <td ng-class="level.askClass">{{ level.askPrice }}</td>
-            <td>{{ level.askSize|number:2 }}</td>
-        </tr>
+      <tr class="active">
+          <th>Mkt</th>
+          <th>Sz</th>
+          <th>AskPx</th>
+          <th>BidPx</th>
+          <th>Sz</th>
+          <th>Spr</th>
+      </tr>
+      <tr class="info">
+          <td>My Q</td>
+          <td ng-class="askIsLive ? 'text-danger' : 'text-muted'">{{ qAskSz|number:2 }}</td>
+          <td ng-class="askIsLive ? 'text-danger' : 'text-muted'">{{ qAskPx }}</td>
+          <td ng-class="bidIsLive ? 'text-danger' : 'text-muted'">{{ qBidPx }}</td>
+          <td ng-class="bidIsLive ? 'text-danger' : 'text-muted'">{{ qBidSz|number:2 }}</td>
+          <td>{{ spreadValue }}</td>
+      </tr>
+      <tr class="active" ng-repeat="level in levels | orderBy:'':true">
+          <td>{{ level.index }}</td>
+          <td>{{ level.askSize|number:2 }}</td>
+          <td ng-class="level.askClass">{{ level.askPrice }}</td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr class="info">
+          <td>Spr</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr class="active" ng-repeat="level in levels">
+          <td>{{ level.index }}</td>
+          <td></td>
+          <td></td>
+          <td ng-class="level.bidClass">{{ level.bidPrice }}</td>
+          <td>{{ level.bidSize|number:2 }}</td>
+          <td></td>
+      </tr>
+    </table>
+</script>
+
+<script type="text/ng-template" id="market_fv_reference.html">
+    <table class="table table-hover table-bordered table-condensed table-responsive">
+      <tr class="active">
+          <th>Mkt</th>
+          <th>Sz</th>
+          <th>Ask</th>
+          <th>FV</th>
+          <th>Bid</th>
+          <th>Sz</th>
+      </tr>
+      <tr class="info">
+          <td>M</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr class="active" ng-repeat="level in fvRefLevels | orderBy:'':true">
+          <td>{{ level.exchange }}</td>
+          <td>{{ level.askSize|number:2 }}</td>
+          <td ng-class="level.askClass">{{ level.askPrice }}</td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr class="info">
+          <td>FV</td>
+          <td></td>
+          <td></td>
+          <td>{{ fairValue }}</td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr class="active" ng-repeat="level in fvRefLevels">
+          <td>{{ level.exchange }}</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td ng-class="level.bidClass">{{ level.bidPrice }}</td>
+          <td>{{ level.bidSize|number:2 }}</td>
+      </tr>
     </table>
 </script>
 
@@ -163,16 +221,20 @@
                         </div>
                     </div>
 
-                    <div class="col-md-3 col-xs-12">
+                    <div class="col-md-3 col-xs-12 text-center">
                         <market-quoting-grid></market-quoting-grid>
                         <messages-grid></messages-grid>
+                    </div>
+
+                    <div class="col-md-3 col-xs-12 text-center">
+                        <market-fv-reference-grid></market-fv-reference-grid>
                     </div>
 
                     <div class="col-md-3 col-xs-12">
                         <trade-list></trade-list>
                     </div>
 
-                    <div class="col-md-5 col-xs-12">
+                    <div class="col-md-2 col-xs-12">
                         <market-trade-grid></market-trade-grid>
                     </div>
                 </div>
@@ -183,17 +245,17 @@
                             <table class="table table-responsive table-bordered">
                                 <thead>
                                     <tr class="active">
-                                        <th>mode</th>
-                                        <th>fv</th>
-                                        <th>apMode</th>
-                                        <th>width</th>
-                                        <th>size</th>
-                                        <th>tbp</th>
-                                        <th>pDiv</th>
-                                        <th>ewma?</th>
-                                        <th>apr?</th>
-                                        <th>trds</th>
-                                        <th>/sec</th>
+                                        <th>Mode</th>
+                                        <th>FV</th>
+                                        <th>ApMode</th>
+                                        <th>Width</th>
+                                        <th>Size</th>
+                                        <th>TBP</th>
+                                        <th>PositionDiv</th>
+                                        <th>EWMA?</th>
+                                        <th>APR?</th>
+                                        <th>TradesLimit</th>
+                                        <th>LimitWindow(sec)</th>
                                         <th colspan="2">
                                             <span ng-if="!pair.quotingParameters.pending && pair.quotingParameters.connected" class="text-success">
                                                 Applied
